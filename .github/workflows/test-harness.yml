@@ -19,7 +19,15 @@ jobs:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
     - name: Print debug data
       run: |
+        set -x
         env
         docker info
         cat "$GITHUB_EVENT_PATH"
-      
+        ls -la "$GITHUB_WORKSPACE"
+    - name: Write some stuff, simulating test harness output
+      run: |
+        echo "My output" > "$GITHUB_WORKSPACE/output"
+    - name: Take test harness output and respond to the comment with it
+      run:
+        set +x
+        cat "$GITHUB_WORKSPACE/output"
