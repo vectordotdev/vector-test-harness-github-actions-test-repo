@@ -24,6 +24,7 @@ jobs:
         docker info
         cat "$GITHUB_EVENT_PATH"
         ls -la "$GITHUB_WORKSPACE"
+        echo "{{ github.head_ref}}"
     - name: Write some stuff, simulating test harness output
       run: |
         echo "My output" > "$GITHUB_WORKSPACE/output"
