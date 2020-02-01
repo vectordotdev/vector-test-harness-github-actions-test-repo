@@ -5,7 +5,7 @@ on:
     types: [created]
 
 jobs:
-  build:
+  test-harness:
 
     runs-on: ubuntu-latest
 
