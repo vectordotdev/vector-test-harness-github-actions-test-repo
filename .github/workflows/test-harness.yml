@@ -3,7 +3,6 @@ name: Test Harness
 on:
   pull_request_review_comment:
     types: [created]
-  commit_comment:
   issue_comment:
 
 jobs:
