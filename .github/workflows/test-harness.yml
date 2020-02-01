@@ -1,9 +1,8 @@
 name: Test Harness
 
 on:
-  pull_request_review_comment:
-    types: [created]
   issue_comment:
+    types: [created]
 
 jobs:
   build:
@@ -11,6 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: khan/pull-request-comment-trigger@master
+      id: check
+      with:
+        trigger: '/test'
+        reaction: rocket
+      env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
     - name: Print debug data
       run: |
         env
