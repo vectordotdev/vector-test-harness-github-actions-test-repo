@@ -17,6 +17,12 @@ jobs:
         reaction: rocket
       env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+    - name: Actions API Test
+      run: |
+        echo "::log-command parameter1=qwe"
+        echo "::set-env name=action_state::yellow"
+        echo "::set-output name=action_fruit::strawberry"
+        echo "::debug file=app.js,line=1::Entered octocatAddition method"
     - name: Print debug data
       run: |
         env
