@@ -18,7 +18,7 @@ jobs:
       env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
     - name: Get issue number  
-      run: echo '{{ github.event.issue.number }}'
+      run: echo '${{ github.event.issue.number }}'
     - name: Actions API Test
       run: |
         echo "::log-command parameter1=qwe"
