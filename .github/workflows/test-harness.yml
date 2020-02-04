@@ -1,0 +1,66 @@
+name: Test Harness
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  test-harness:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: khan/pull-request-comment-trigger@master
+      id: check
+      with:
+        trigger: '/test'
+        reaction: rocket
+      env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+    # TODO: check for write access
+    - name: 'Abort the execution'
+      run: 'exit 1'
+      if: steps.check.outputs.triggered != 'true'
+
+    - name: Clone the PR branch
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+        ref: 'refs/pull/${{ github.event.issue.number }}/head'
+    - name: Gather info on the cloned code
+      id: cloned
+      run: echo "::set-output name=head_rev::$(git rev-parse HEAD)"
+    # Doesn't work yet, see https://github.com/actions/cache/issues/176
+    - name: Cache deb
+      id: deb-cache
+      uses: actions/cache@v1
+      with:
+        path: target/artifacts/vector-amd64.deb
+        key: vector-test-harness-packaged-deb-${{ steps.cloned.outputs.head_rev }}
+    - name: Make deb
+      if: steps.deb-cache.outputs.cache-hit != 'true'
+      run: PASS_FEATURES=default-musl ./scripts/docker-run.sh builder-x86_64-unknown-linux-musl make build-archive package-deb
+
+    - name: Simulate test harness invocation
+      run: |
+        ls -la target/artifacts/ > "$GITHUB_WORKSPACE/output"
+
+    - name: Post a comment with the results
+      uses: actions/github-script@0.4.0
+      with:
+        github-token: '${{secrets.GITHUB_TOKEN}}'
+        script: |
+          const output = fs.readFileSync(`${process.env.GITHUB_WORKSPACE}/output`);
+          const body = 'Test harness invocation complete!\n\n' +
+            '```\n' +
+            output + '\n' +
+            '```\n' +
+            `\nYou can check the [details](${{ github.event.repository.html_url }}/actions/runs/${core.getInput('action-run-id')}) to learn more!`;
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body
+          })
+        action-run-id: '${{ env.GITHUB_RUN_ID }}'
+      if: always()
