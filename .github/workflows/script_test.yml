@@ -1,0 +1,20 @@
+name: Script test
+
+on:
+  push:
+
+jobs:
+  job:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Simulate test harness invocation
+      run: |
+        echo "big table here" > "$GITHUB_WORKSPACE/output"
+
+    - name: Post a comment with the results
+      uses: ./.github/actions/test-harness-report
+      if: always()

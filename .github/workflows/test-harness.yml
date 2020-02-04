@@ -51,16 +51,21 @@ jobs:
         github-token: '${{secrets.GITHUB_TOKEN}}'
         script: |
           const output = fs.readFileSync(`${process.env.GITHUB_WORKSPACE}/output`);
-          const body = 'Test harness invocation complete!\n\n' +
+
+          const body =
+            'Test harness invocation complete!\n' +
+            '\n' +
             '```\n' +
-            output + '\n' +
+            output +
+            '\n' +
             '```\n' +
-            `\nYou can check the [details](${{ github.event.repository.html_url }}/actions/runs/${core.getInput('action-run-id')}) to learn more!`;
+            '\n' +
+            `You can check the [execution log](${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}) to learn more!`;
+
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body
           })
-        action-run-id: '${{ env.GITHUB_RUN_ID }}'
       if: always()
