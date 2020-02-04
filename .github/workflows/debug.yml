@@ -1,4 +1,4 @@
-name: Test Harness
+name: Debug data
 
 on:
   issue_comment:
@@ -10,14 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: khan/pull-request-comment-trigger@master
-      id: check
-      with:
-        trigger: '/test'
-        reaction: rocket
-      env:
-        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-    - name: Get issue number  
+    - name: Get issue number
       run: echo '${{ github.event.issue.number }}'
     - name: Actions API Test
       run: |
