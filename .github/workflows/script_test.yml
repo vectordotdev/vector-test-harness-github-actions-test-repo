@@ -16,5 +16,29 @@ jobs:
         echo "big table here" > "$GITHUB_WORKSPACE/output"
 
     - name: Post a comment with the results
-      uses: ./.github/actions/test-harness-report
+      uses: actions/github-script@0.4.0
+      with:
+        github-token: '${{secrets.GITHUB_TOKEN}}'
+        script: |
+          const fs = require('fs');
+          const { promisify } = require('util');
+          const readFileAsync = promisify(fs.readFile);
+          const output = readFileAsync(`${process.env.GITHUB_WORKSPACE}/output`);
+
+          const body =
+            'Test harness invocation complete!\n' +
+            '\n' +
+            '```\n' +
+            output +
+            '\n' +
+            '```\n' +
+            '\n' +
+            `You can check the [execution log](${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}) to learn more!`;
+
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body
+          })
       if: always()
