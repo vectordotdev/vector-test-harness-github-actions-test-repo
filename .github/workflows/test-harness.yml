@@ -50,7 +50,11 @@ jobs:
       with:
         github-token: '${{secrets.GITHUB_TOKEN}}'
         script: |
-          const output = fs.readFileSync(`${process.env.GITHUB_WORKSPACE}/output`);
+          const fs = require('fs');
+          const { promisify } = require('util');
+          const readFileAsync = promisify(fs.readFile);
+
+          const output = await readFileAsync(`${process.env.GITHUB_WORKSPACE}/output`);
 
           const body =
             'Test harness invocation complete!\n' +
