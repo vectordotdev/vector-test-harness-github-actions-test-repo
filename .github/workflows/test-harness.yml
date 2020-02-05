@@ -41,9 +41,21 @@ jobs:
       if: steps.deb-cache.outputs.cache-hit != 'true'
       run: PASS_FEATURES=default-musl ./scripts/docker-run.sh builder-x86_64-unknown-linux-musl make build-archive package-deb
 
-    - name: Simulate test harness invocation
-      run: |
-        ls -la target/artifacts/ > "$GITHUB_WORKSPACE/output"
+    - name: Invoke test harness
+      uses: docker://timberiodev/vector-test-harness:latest
+      with:
+        args: |
+          bash -c "pwd \
+          && /vector-test-harness/bin/test -t docker_partial_events_merging_correctness -s vector \
+          && /vector-test-harness/bin/cohort -s vector | tee '${{ env.GITHUB_WORKSPACE }}/output'"
+      env:
+        GENERATE_SSH_KEY: true
+        VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '${{ env.GITHUB_WORKSPACE }}/target/artifacts/vector-amd64.deb'
+        VECTOR_TEST_USER_ID: 'github-actions-vector-${{ github.event.issue.number }}'
+        VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
+        AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+        AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+        ANSIBLE_EXTRA_ARGS: '-vvv'
 
     - name: Post a comment with the results
       uses: actions/github-script@0.4.0
