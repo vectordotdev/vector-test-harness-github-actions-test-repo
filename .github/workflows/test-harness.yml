@@ -50,7 +50,7 @@ jobs:
           && bin/cohort -s vector | tee \"$GITHUB_WORKSPACE/output\""
       env:
         GENERATE_SSH_KEY: true
-        VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '${{ env.GITHUB_WORKSPACE }}/target/artifacts/vector-amd64.deb'
+        VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '$GITHUB_WORKSPACE/target/artifacts/vector-amd64.deb'
         VECTOR_TEST_USER_ID: 'gha_${{ github.event.issue.number }}'
         VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
         AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
