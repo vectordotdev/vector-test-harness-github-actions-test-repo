@@ -45,10 +45,10 @@ jobs:
       uses: docker://timberiodev/vector-test-harness:latest
       with:
         args: |
-          bash -c 'cd /vector-test-harness \
+          bash -c "cd /vector-test-harness \
           && bin/test -t docker_partial_events_merging_correctness -s vector \
-          && bin/cohort -s vector | tee "$GITHUB_WORKSPACE/output" \
-          || echo "Something went wrong, see log for more details." | tee "$GITHUB_WORKSPACE/output"'
+          && bin/cohort -s vector | tee \"$GITHUB_WORKSPACE/output\" \
+          || echo \"Something went wrong, see log for more details.\" | tee \"$GITHUB_WORKSPACE/output\""
       env:
         GENERATE_SSH_KEY: true
         # VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '${{ env.GITHUB_WORKSPACE }}/target/artifacts/vector-amd64.deb'
