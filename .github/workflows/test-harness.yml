@@ -46,7 +46,7 @@ jobs:
       with:
         args: |
           bash -c "cd /vector-test-harness \
-          && bin/test -t docker_partial_events_merging_correctness -s vector \
+          && bin/test -t tcp_to_tcp_performance -s vector \
           && bin/cohort -s vector | tee '${{ env.GITHUB_WORKSPACE }}/output'"
       env:
         GENERATE_SSH_KEY: true
