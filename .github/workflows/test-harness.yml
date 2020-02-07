@@ -66,6 +66,8 @@ jobs:
           const { promisify } = require('util');
           const readFileAsync = promisify(fs.readFile);
 
+          console.log(process.env);
+
           let output;
           try {
             output = await readFileAsync(`${process.env.GITHUB_WORKSPACE}/output`);
