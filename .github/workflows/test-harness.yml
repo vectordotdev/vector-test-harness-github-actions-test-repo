@@ -66,15 +66,18 @@ jobs:
           const { promisify } = require('util');
           const readFileAsync = promisify(fs.readFile);
 
-          const output = await readFileAsync(`${process.env.GITHUB_WORKSPACE}/output`);
+          let output;
+          try {
+            output = await readFileAsync(`${process.env.GITHUB_WORKSPACE}/output`);
+            output = '```\n' + output + '\n```\n';
+          } catch {
+            output = "Something went wrong, see log for more details.\n"
+          }
 
           const body =
             'Test harness invocation complete!\n' +
             '\n' +
-            '```\n' +
             output +
-            '\n' +
-            '```\n' +
             '\n' +
             `You can check the [execution log](${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}) to learn more!`;
 
