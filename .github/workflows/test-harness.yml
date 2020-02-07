@@ -55,7 +55,6 @@ jobs:
         VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
         AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
         AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
-        ANSIBLE_EXTRA_ARGS: '-vvv'
 
     - name: Post a comment with the results
       uses: actions/github-script@0.4.0
