@@ -66,6 +66,7 @@ jobs:
           const readFileAsync = promisify(fs.readFile);
 
           console.log(process.env);
+          console.log(context);
 
           let output;
           try {
