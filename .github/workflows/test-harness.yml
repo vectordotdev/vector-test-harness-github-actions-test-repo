@@ -77,7 +77,7 @@ jobs:
           }
 
           const body =
-            'Test harness invocation complete!\n' +
+            `Test harness invocation requested by ${context.payload.comment.html_url} is complete!\n` +
             '\n' +
             output +
             '\n' +
