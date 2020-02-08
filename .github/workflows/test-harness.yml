@@ -45,7 +45,7 @@ jobs:
       uses: docker://timberiodev/vector-test-harness:latest
       with:
         args: |
-          bash -c "cd /vector-test-harness \
+          bash -o pipefail -xc "cd /vector-test-harness \
           && bin/test -t docker_partial_events_merging_correctness -s vector \
           && bin/cohort -s vector | tee \"$GITHUB_WORKSPACE/output\""
       env:
