@@ -9,19 +9,33 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Only run if we're invoked with a new command comment on a pull request.
+    if: |
+      github.event_name == 'issue_comment' && github.event.action == 'created'
+      && github.event.issue.pull_request != null
+      && startsWith(github.event.comment.body, '/test')
+
     steps:
-    - uses: khan/pull-request-comment-trigger@master
-      id: check
+    - name: Indicate that we picked up the command with a comment reaction
+      uses: actions/github-script@0.4.0
       with:
-        trigger: '/test'
-        reaction: rocket
+        github-token: '${{secrets.GITHUB_TOKEN}}'
+        script: |
+          github.reactions.createForIssueComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            comment_id: context.payload.event.comment.id,
+            "rocket"
+          })
+
+    - name: Check user permissions
+      uses: "lannonbr/repo-permission-check-action@2.0.0"
+      with:
+        permission: "write"
       env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-    # TODO: check for write access
-    - name: 'Abort the execution'
-      run: 'exit 1'
-      if: steps.check.outputs.triggered != 'true'
 
+    # Clone vector source and build .deb
     - name: Clone the PR branch
       uses: actions/checkout@v2
       with:
