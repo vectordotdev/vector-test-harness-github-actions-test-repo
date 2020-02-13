@@ -24,8 +24,8 @@ jobs:
           github.reactions.createForIssueComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            comment_id: context.payload.event.comment.id,
-            "rocket"
+            comment_id: context.payload.comment.id,
+            content: "rocket"
           })
 
     - name: Check user permissions
