@@ -60,15 +60,26 @@ jobs:
       with:
         args: |
           bash -o pipefail -xc "cd /vector-test-harness \
-          && bin/test -t docker_partial_events_merging_correctness -s vector \
-          && bin/cohort -s vector | tee \"$GITHUB_WORKSPACE/output\""
+          && bin/test -t docker_partial_events_merging_correctness -s vector"
       env:
         GENERATE_SSH_KEY: true
         VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '${{ github.workspace }}/target/artifacts/vector-amd64.deb'
         VECTOR_TEST_USER_ID: 'gha_${{ github.event.issue.number }}'
         VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
-        AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-        AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+        AWS_ACCESS_KEY_ID: '${{ secrets.TEST_HARNESS_AWS_ACCESS_KEY_ID }}'
+        AWS_SECRET_ACCESS_KEY: '${{ secrets.TEST_HARNESS_AWS_SECRET_ACCESS_KEY }}'
+        AWS_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}'
+    - name: Gather test harness execution results
+      uses: docker://timberiodev/vector-test-harness:latest
+      with:
+        args: |
+          bash -o pipefail -xc "cd /vector-test-harness \
+          && bin/cohort -s vector | tee \"$GITHUB_WORKSPACE/output\""
+      env:
+        GENERATE_SSH_KEY: true
+        VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
+        AWS_ACCESS_KEY_ID: '${{ secrets.TEST_HARNESS_RESULTS_AWS_ACCESS_KEY_ID }}'
+        AWS_SECRET_ACCESS_KEY: '${{ secrets.TEST_HARNESS_RESULTS_AWS_SECRET_ACCESS_KEY }}'
         AWS_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}'
 
     - name: Post a comment with the results
