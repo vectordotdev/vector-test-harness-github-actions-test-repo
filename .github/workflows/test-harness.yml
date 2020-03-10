@@ -59,12 +59,14 @@ jobs:
       uses: docker://timberiodev/vector-test-harness:latest
       with:
         args: |
+          git_hash=$(git rev-parse --short "$GITHUB_SHA")
+          git_branch=${GITHUB_REF##*/}
+          git_count=$(git rev-list --count $git_branch)
           bash -o pipefail -xc "cd /vector-test-harness \
-          && bin/test -t docker_partial_events_merging_correctness -s vector"
+          && bin/test -t tcp_to_tcp_performance -s vector -v dev-${git_branch}-${git_count}-${git_hash}"
       env:
         GENERATE_SSH_KEY: true
-        VECTOR_TEST_CUSTOM_VECTOR_DEB_PATH: '${{ github.workspace }}/target/artifacts/vector-amd64.deb'
-        VECTOR_TEST_CUSTOM_VECTOR_VERSION: 'git-${{ steps.cloned.outputs.head_rev }}'
+        VECTOR_TEST_VECTOR_DEB_PATH: '${{ github.workspace }}/target/artifacts/vector-amd64.deb'
         VECTOR_TEST_USER_ID: 'gha_${{ github.event.issue.number }}'
         VECTOR_TEST_RESULTS_S3_BUCKET_NAME: test-results.vector.dev
         AWS_ACCESS_KEY_ID: '${{ secrets.TEST_HARNESS_AWS_ACCESS_KEY_ID }}'
