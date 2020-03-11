@@ -42,15 +42,17 @@ jobs:
         lfs: true
         ref: 'refs/pull/${{ github.event.issue.number }}/head'
     - name: Gather info on the cloned code
-      id: cloned
-      run: echo "::set-output name=head_rev::$(git rev-parse HEAD)"
+      id: cloned-repo-info
+      run: |
+        echo "::set-output name=head_rev::$(git rev-parse HEAD)"
+        echo "::set-output name=test_harness_vector_version::dev-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)-$(git rev-list --count "$(git rev-parse --abbrev-ref HEAD)")"
     # Doesn't work yet, see https://github.com/actions/cache/issues/176
     - name: Cache deb
       id: deb-cache
       uses: actions/cache@v1
       with:
         path: target/artifacts/vector-amd64.deb
-        key: vector-test-harness-packaged-deb-${{ steps.cloned.outputs.head_rev }}
+        key: vector-test-harness-packaged-deb-${{ steps.cloned-repo-info.outputs.head_rev }}
     - name: Make deb
       if: steps.deb-cache.outputs.cache-hit != 'true'
       run: PASS_FEATURES=default-musl ./scripts/docker-run.sh builder-x86_64-unknown-linux-musl make build-archive package-deb
@@ -59,11 +61,8 @@ jobs:
       uses: docker://timberiodev/vector-test-harness:latest
       with:
         args: |
-          git_hash=$(git rev-parse --short "$GITHUB_SHA")
-          git_branch=${GITHUB_REF##*/}
-          git_count=$(git rev-list --count $git_branch)
           bash -o pipefail -xc "cd /vector-test-harness \
-          && bin/test -t tcp_to_tcp_performance -s vector -v dev-${git_branch}-${git_count}-${git_hash}"
+          && bin/test -t tcp_to_tcp_performance -s vector -v '${{ steps.cloned-repo-info.outputs.test_harness_vector_version }}'"
       env:
         GENERATE_SSH_KEY: true
         VECTOR_TEST_VECTOR_DEB_PATH: '${{ github.workspace }}/target/artifacts/vector-amd64.deb'
