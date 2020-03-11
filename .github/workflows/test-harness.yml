@@ -35,6 +35,21 @@ jobs:
       env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
+    - name: Get Pull Request info
+      id: pr-info
+      uses: MOZGIII/github-script@core-access
+      with:
+        script: |
+          const pr_info_response = await github.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          const pr_info = pr_info_response.data;
+          core.setOutput("head_ref", pr_info.head.ref);
+          core.setOutput("head_sha", pr_info.head.sha);
+          return pr_info;
+
     # Clone vector source and build .deb
     - name: Clone the PR branch
       uses: actions/checkout@v2
@@ -44,15 +59,14 @@ jobs:
     - name: Gather info on the cloned code
       id: cloned-repo-info
       run: |
-        echo "::set-output name=head_rev::$(git rev-parse HEAD)"
-        echo "::set-output name=test_harness_vector_version::dev-$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)-$(git rev-list --count "$(git rev-parse --abbrev-ref HEAD)")"
+        echo "::set-output name=test_harness_vector_version::dev-${{ steps.pr-info.outputs.head_ref }}-$(git rev-parse --short HEAD)-$(git rev-list --count '${{ steps.pr-info.outputs.head_ref }}')"
     # Doesn't work yet, see https://github.com/actions/cache/issues/176
     - name: Cache deb
       id: deb-cache
       uses: actions/cache@v1
       with:
         path: target/artifacts/vector-amd64.deb
-        key: vector-test-harness-packaged-deb-${{ steps.cloned-repo-info.outputs.head_rev }}
+        key: vector-test-harness-packaged-deb-${{ steps.pr-info.outputs.head_sha }}
     - name: Make deb
       if: steps.deb-cache.outputs.cache-hit != 'true'
       run: PASS_FEATURES=default-musl ./scripts/docker-run.sh builder-x86_64-unknown-linux-musl make build-archive package-deb
