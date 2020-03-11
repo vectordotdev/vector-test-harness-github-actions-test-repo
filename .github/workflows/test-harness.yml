@@ -48,6 +48,8 @@ jobs:
           const pr_info = pr_info_response.data;
           core.setOutput("head_ref", pr_info.head.ref);
           core.setOutput("head_sha", pr_info.head.sha);
+          core.setOutput("base_ref", pr_info.base.ref);
+          core.setOutput("base_sha", pr_info.base.sha);
           return pr_info;
 
     # Clone vector source and build .deb
@@ -55,11 +57,14 @@ jobs:
       uses: actions/checkout@v2
       with:
         lfs: true
-        ref: 'refs/pull/${{ github.event.issue.number }}/head'
-    - name: Gather info on the cloned code
+        ref: '${{ steps.pr-info.outputs.head_sha }}'
+    - name: Complete repo clone and gather info on the cloned code
       id: cloned-repo-info
       run: |
-        echo "::set-output name=test_harness_vector_version::dev-${{ steps.pr-info.outputs.head_ref }}-$(git rev-parse --short HEAD)-$(git rev-list --count '${{ steps.pr-info.outputs.head_ref }}')"
+        git fetch --no-tags --prune --depth=1 origin \
+          +refs/heads/${{ steps.pr-info.outputs.head_ref }}:refs/remotes/origin/${{ steps.pr-info.outputs.head_ref }} \
+          +refs/heads/${{ steps.pr-info.outputs.base_ref }}:refs/remotes/origin/${{ steps.pr-info.outputs.base_ref }}
+        echo "::set-output name=test_harness_vector_version::dev-${{ steps.pr-info.outputs.head_ref }}-$(git rev-parse --short HEAD)-$(git rev-list --count '${{ steps.pr-info.outputs.base_sha }}..${{ steps.pr-info.outputs.head_sha }}')"
     # Doesn't work yet, see https://github.com/actions/cache/issues/176
     - name: Cache deb
       id: deb-cache
