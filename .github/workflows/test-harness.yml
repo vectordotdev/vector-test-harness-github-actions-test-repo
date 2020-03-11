@@ -61,7 +61,7 @@ jobs:
     - name: Complete repo clone and gather info on the cloned code
       id: cloned-repo-info
       run: |
-        git fetch --no-tags --prune --depth=1 origin \
+        git fetch --no-tags --prune --depth=350 origin \
           +refs/heads/${{ steps.pr-info.outputs.head_ref }}:refs/remotes/origin/${{ steps.pr-info.outputs.head_ref }} \
           +refs/heads/${{ steps.pr-info.outputs.base_ref }}:refs/remotes/origin/${{ steps.pr-info.outputs.base_ref }}
         echo "::set-output name=test_harness_vector_version::dev-${{ steps.pr-info.outputs.head_ref }}-$(git rev-list --count '${{ steps.pr-info.outputs.base_sha }}..${{ steps.pr-info.outputs.head_sha }}')-$(git rev-parse --short HEAD)"
