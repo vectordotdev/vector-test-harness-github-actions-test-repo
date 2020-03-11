@@ -62,7 +62,7 @@ jobs:
       with:
         args: |
           bash -o pipefail -xc "cd /vector-test-harness \
-          && bin/test -t tcp_to_tcp_performance"
+          && bin/test $(echo '${{ github.event.comment.body }}' | head -n 1 | sed 's|^/test ||')"
       env:
         GENERATE_SSH_KEY: true
         VECTOR_TEST_VECTOR_DEB_PATH: '${{ github.workspace }}/target/artifacts/vector-amd64.deb'
